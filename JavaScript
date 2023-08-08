@@ -1,0 +1,37 @@
+function sendEmailForPoorConditionItems() {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName('Uniform Inventory');
+    
+    // Fetch values from the sheet
+    const data = sheet.getDataRange().getValues();
+    
+    // Identify the column numbers based on header names
+    const columns = {
+        itemId: data[0].indexOf("Item ID"),
+        type: data[0].indexOf("Uniform Type"),
+        size: data[0].indexOf("Size"),
+        condition: data[0].indexOf("Condition"),
+        quantity: data[0].indexOf("Quantity")
+    };
+    
+    // Filter for items with "Poor" condition and gather relevant information
+    const poorItems = data.filter(row => row[columns.condition] === "Poor")
+        .map(row => ({
+            itemId: row[columns.itemId],
+            type: row[columns.type],
+            size: row[columns.size],
+            quantity: row[columns.quantity]
+        }));
+    
+    // Create the email body from the items list
+    let emailBody = "The following uniform items are in 'Poor' condition:\n\n";
+    
+    poorItems.forEach(item => {
+        emailBody += `Item ID: ${item.itemId}\nUniform Type: ${item.type}\nSize: ${item.size}\nQuantity: ${item.quantity}\n\n`;
+    });
+    
+    // Send the email
+    const recipients = "example@email.com"; 
+    const subject = "Uniform Items in Poor Condition";
+    MailApp.sendEmail(recipients, subject, emailBody);
+}
